@@ -1,6 +1,34 @@
 NAME
     PPI::Tinderbox - Process all of CPAN to find parsing bugs
 
+SYNOPSIS
+      # Create the new Tinderbox process
+      my $Tinderbox = PPI::Tinderbox->new(
+          # Paths
+          remote             => 'http://cpan.pair.com/',
+          local              => '~/tinderbox/minicpan',
+          source             => '~/tinderbox/expanded',
+          results            => '~/tinderbox/results.txt',
+          archive_tar_report => '~/tinderbox/archive_tar_report.txt',
+
+          # Options
+          trace              => 1,
+          # force_expand       => 1,
+          force_processor    => 1,
+          limit_processor    => 500,
+          # flush_results      => 1,
+          ) or die PPI::Tinderbox->errstr
+            . ": Failed to create PPI::Tinderbox object";
+
+      # Execute the Tinderbox
+      my $rv = $Tinderbox->run;
+
+      if ( $rv ) {
+          print "\nTinderbox run completed\n";
+      } else {
+          print "\nTinderbox run failed\n";
+      }
+
 DESCRIPTION
     The nature of PPI means that it is never perfect at parsing files, just
     good enough to get the job done.

@@ -26,7 +26,7 @@ use PPI::Lexer     ();
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '0.03';
+	$VERSION = '0.04';
 }
 
 # Unlike the general KeyedTask, this CAN autoconstruct
@@ -54,7 +54,9 @@ Returns a new PPI::Processor::KeyedTask::Ini object, or C<undef> on error.
 
 sub new {
 	my $class = ref $_[0] ? ref shift : shift;
+	my %args  = @_;
 	$class->SUPER::new(
+		%args,
 		tasks => {
 			'01tokenizer'  => 'PPI::Tinderbox::Task->task_tokenizer',
 			'02tokens'     => 'PPI::Tinderbox::Task->task_tokens',

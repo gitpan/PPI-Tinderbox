@@ -1,5 +1,5 @@
 name: PPI-Tinderbox
-version: 0.03
+version: 0.04
 abstract: The PPI Tinderbox - Parse every module in CPAN
 author: Adam Kennedy<cpan@ali.as>
 license: perl
@@ -10,8 +10,8 @@ build_requires:
 requires:
   perl: 5.005
   PPI: 0.840
-  PPI::Processor: 0.08
-  CPAN::Processor: 0.05
+  PPI::Processor: 0.10
+  CPAN::Processor: 0.06
 no_index:
   directory:
     - inc

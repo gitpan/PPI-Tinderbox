@@ -6,6 +6,35 @@ package PPI::Tinderbox;
 
 PPI::Tinderbox - Process all of CPAN to find parsing bugs
 
+=head1 SYNOPSIS
+
+  # Create the new Tinderbox process
+  my $Tinderbox = PPI::Tinderbox->new(
+      # Paths
+      remote             => 'http://cpan.pair.com/',
+      local              => '~/tinderbox/minicpan',
+      source             => '~/tinderbox/expanded',
+      results            => '~/tinderbox/results.txt',
+      archive_tar_report => '~/tinderbox/archive_tar_report.txt',
+
+      # Options
+      trace              => 1,
+      # force_expand       => 1,
+      force_processor    => 1,
+      limit_processor    => 500,
+      # flush_results      => 1,
+      ) or die PPI::Tinderbox->errstr
+      	. ": Failed to create PPI::Tinderbox object";
+
+  # Execute the Tinderbox
+  my $rv = $Tinderbox->run;
+
+  if ( $rv ) {
+      print "\nTinderbox run completed\n";
+  } else {
+      print "\nTinderbox run failed\n";
+  }
+
 =head1 DESCRIPTION
 
 The nature of PPI means that it is never perfect at parsing files, just good
@@ -47,7 +76,7 @@ use PPI::Tinderbox::Task ();
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '0.03';
+	$VERSION = '0.04';
 }
 
 
@@ -71,12 +100,13 @@ Returns a new PPI::Tinderbox object, or C<undef> on error.
 
 sub new {
 	my $class  = ref $_[0] ? ref shift : shift;
-	my %params = @_;
+	my %args = @_;
 
 	# Create the Processor
 	my $Processor = PPI::Processor->new(
-		source     => delete($params{source}),
-		flushstate => delete($params{flushstate}),
+		source     => delete($args{source}),
+		flushstore => delete($args{flush_results}),
+		limit      => delete($args{limit_processor}),
 		);
 	unless ( $Processor ) {
 		return $class->_error( PPI::Processor->errstr );
@@ -84,16 +114,13 @@ sub new {
 
 	# Initialise and add the main Task
 	my %task = ();
-	if ( $params{results_file} ) {
-		$task{file} = delete $params{results_file};
-	}
-	my $Task = PPI::Tinderbox::Task->new( %task )
+	$task{file} = delete $args{results} if $args{results};
+	$Processor->add_task( 'PPI::Tinderbox::Task', %task )
 		or return $class->_error( "Failed to create PPI::Tinderbox::Task object" );
-	$Processor->add_task( $Task );
 
 	# Set the appropriate defaults
-	$params{processor} = $Processor;
-	$params{file_filters} ||= [
+	$args{processor} = $Processor;
+	$args{file_filters} ||= [
 		qr~\bt\b~,
 		qr~/inc/~,
 		qr~\bdemos\b~i,
@@ -103,15 +130,15 @@ sub new {
 		qr~\bexamples\b~,
 		qr~\\\.\#~,
 		];
-	$params{module_filters} ||= [
+	$args{module_filters} ||= [
 		qr/^Acme::/,
 		qr/^Meta::/,
 		];
-	$params{skip_perl} = 1 unless exists $params{skip_perl};
-	$params{force}     = 1 unless exists $params{force};
+	$args{skip_perl} = 1 unless exists $args{skip_perl};
+	$args{force}     = 1 unless exists $args{force};
 
 	# Create the CPAN Processor
-	my $self = $class->SUPER::new( %params );
+	my $self = $class->SUPER::new( %args );
 	return $self unless $self;
 
 	# Manually add the callbacks
