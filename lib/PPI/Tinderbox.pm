@@ -41,13 +41,13 @@ change to use that version instead.
 =cut
 
 use strict;
-use PPI::Processor ();
-use PPI::Tinderbox::Task ();
 use base 'CPAN::Processor';
+use PPI::Processor       ();
+use PPI::Tinderbox::Task ();
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '0.01';
+	$VERSION = '0.03';
 }
 
 
@@ -81,9 +81,17 @@ sub new {
 	unless ( $Processor ) {
 		return $class->_error( PPI::Processor->errstr );
 	}
-	$Processor->add_task( 'PPI::Tinderbox::Task' );
 
-	# Create the CPAN::Processor, applying the appropriate defaults
+	# Initialise and add the main Task
+	my %task = ();
+	if ( $params{results_file} ) {
+		$task{file} = delete $params{results_file};
+	}
+	my $Task = PPI::Tinderbox::Task->new( %task )
+		or return $class->_error( "Failed to create PPI::Tinderbox::Task object" );
+	$Processor->add_task( $Task );
+
+	# Set the appropriate defaults
 	$params{processor} = $Processor;
 	$params{file_filters} ||= [
 		qr~\bt\b~,
@@ -101,7 +109,16 @@ sub new {
 		];
 	$params{skip_perl} = 1 unless exists $params{skip_perl};
 	$params{force}     = 1 unless exists $params{force};
-	$class->SUPER::new( %params );
+
+	# Create the CPAN Processor
+	my $self = $class->SUPER::new( %params );
+	return $self unless $self;
+
+	# Manually add the callbacks
+	$Processor->{before_file} = sub { $self->trace( "Processing $_[0]" ); 1 };
+	$Processor->{after_file}  = sub { $self->trace( " ... done\n" ) };
+
+	$self;
 }
 
 1;

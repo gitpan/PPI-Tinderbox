@@ -20,14 +20,13 @@ memory leak, and is round-trip-safe.
 
 use strict;
 use UNIVERSAL 'isa';
-use base 'PPI::Processor::Task';
+use base 'PPI::Processor::KeyedTask::Ini';
 use PPI::Tokenizer ();
 use PPI::Lexer     ();
-use PPI::Processor::KeyedTask::Ini ();
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '0.01';
+	$VERSION = '0.03';
 }
 
 # Unlike the general KeyedTask, this CAN autoconstruct
@@ -55,13 +54,13 @@ Returns a new PPI::Processor::KeyedTask::Ini object, or C<undef> on error.
 
 sub new {
 	my $class = ref $_[0] ? ref shift : shift;
-	PPI::Processor::KeyedTask::Ini->new(
+	$class->SUPER::new(
 		tasks => {
-			'01tokenizer'  => 'PPI::Tinderbox->task_tokenizer',
-			'02tokens'     => 'PPI::Tinderbox->task_tokens',
-			'03lexer_leak' => 'PPI::Tinderbox->task_lexer_leak',
-			'04document'   => 'PPI::Tinderbox->task_document',
-			'05unmatched'  => 'PPI::Tinderbox->task_unmatched',
+			'01tokenizer'  => 'PPI::Tinderbox::Task->task_tokenizer',
+			'02tokens'     => 'PPI::Tinderbox::Task->task_tokens',
+			'03lexer_leak' => 'PPI::Tinderbox::Task->task_lexer_leak',
+			'04document'   => 'PPI::Tinderbox::Task->task_document',
+			'05unmatched'  => 'PPI::Tinderbox::Task->task_unmatched',
 			},
 		);
 }
@@ -74,6 +73,7 @@ sub process_file {
 	my %results = map { $_ => undef } keys %tasks;
 	foreach my $task ( sort keys %tasks ) {
 		eval {
+			local $_ = $filename;
 			$results{$task} = $tasks{$task}->($filename);
 		};
 		last if $@; # Skip the rest of the tests on error
@@ -112,7 +112,7 @@ sub task_tokens {
 }
 
 # Do we leak when attempting to create a Document
-sub task_lexer_leaksafe {
+sub task_lexer_leak {
 	my ($class, $file) = @_;
 
 	# Get a count of the number of PARENT keys in the PPI

@@ -1,4 +1,10 @@
 Revision history for Perl extension PPI::Tinderbox
 
+0.03 Sun Jan  9 2004
+	- Updating to keep compatible with PPI::Processor 0.08
+
+0.02 Sun Jan  9 2004
+	- Fixed some bugs
+
 0.01 Sun Jan  9 2005
 	- Created the initial version of the module
