@@ -1,13 +1,17 @@
 Revision history for Perl extension PPI::Tinderbox
 
-0.04 Sun Jan 10 2004
+0.05 Mon Jan 10 2004
+	- Enable the 'incremental_write' option by default
+	- Updated dependencies to ensure incremental_write is available
+
+0.04 Sun Jan 10 2005
 	- Pass through the results_file and limit_processor params properly
 	- Added a proper SYNOPSIS POD section
 
-0.03 Sun Jan  9 2004
+0.03 Sun Jan  9 2005
 	- Updating to keep compatible with PPI::Processor 0.08
 
-0.02 Sun Jan  9 2004
+0.02 Sun Jan  9 2005
 	- Fixed some bugs
 
 0.01 Sun Jan  9 2005

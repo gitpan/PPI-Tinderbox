@@ -65,6 +65,13 @@ version of PPI::Processor will become available relatively quickly,
 and once this occurs it would be expected that the PPI Tinderbox would
 change to use that version instead.
 
+=head1 EXTENDING
+
+PPI::Tinderbox is generally considered an "end-use" module, and it may
+be difficult to extend.
+
+You may wish to take a look at the more general L<CPAN::Processor> instead.
+
 =head1 METHODS
 
 =cut
@@ -76,7 +83,7 @@ use PPI::Tinderbox::Task ();
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '0.04';
+	$VERSION = '0.05';
 }
 
 
@@ -113,7 +120,7 @@ sub new {
 	}
 
 	# Initialise and add the main Task
-	my %task = ();
+	my %task = ( incremental_write => 1 );
 	$task{file} = delete $args{results} if $args{results};
 	$Processor->add_task( 'PPI::Tinderbox::Task', %task )
 		or return $class->_error( "Failed to create PPI::Tinderbox::Task object" );
@@ -136,6 +143,9 @@ sub new {
 		];
 	$args{skip_perl} = 1 unless exists $args{skip_perl};
 	$args{force}     = 1 unless exists $args{force};
+
+	# If they want the missing Makefile.PL, we have to force expansion
+	$args{force_expand} = 1 if $args{missing_makefile_report};
 
 	# Create the CPAN Processor
 	my $self = $class->SUPER::new( %args );

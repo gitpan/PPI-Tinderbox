@@ -57,6 +57,12 @@ DESCRIPTION
     once this occurs it would be expected that the PPI Tinderbox would
     change to use that version instead.
 
+EXTENDING
+    PPI::Tinderbox is generally considered an "end-use" module, and it may
+    be difficult to extend.
+
+    You may wish to take a look at the more general CPAN::Processor instead.
+
 METHODS
 new minicpan => $CPAN::Mini,
     The "new" constructor creates a new PPI Tinderbox top level object,

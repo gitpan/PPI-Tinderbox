@@ -8,8 +8,8 @@ license       ( 'perl'                       );
 
 requires      ( 'perl'            => '5.005' );
 requires      ( 'PPI'             => '0.840' );
-requires      ( 'PPI::Processor'  => '0.10'  );
-requires      ( 'CPAN::Processor' => '0.06'  );
+requires      ( 'PPI::Processor'  => '0.11'  );
+requires      ( 'CPAN::Processor' => '0.07'  );
 
 build_requires( 'File::Spec'      => '0.82'  );
 build_requires( 'Test::More'      => '0.47'  );
