@@ -21,13 +21,13 @@ memory leak, and is round-trip-safe.
 use strict;
 use UNIVERSAL 'isa';
 use base 'PPI::Processor::KeyedTask::Ini';
+use Time::HiRes    ();
 use PPI::Tokenizer ();
 use PPI::Lexer     ();
-use threads        ();
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '0.06';
+	$VERSION = '0.08';
 }
 
 # Unlike the general KeyedTask, this CAN autoconstruct
@@ -71,6 +71,14 @@ sub new {
 sub process_file {
 	my ($self, $file, $path) = @_;
 
+	# Anything bigger than 500k we skip, as PPI chokes
+	my $size = (stat $file)[7];
+	return undef unless defined $size;
+	return '' if $size > 500000;
+
+	# Get the start time
+	my $start = [ Time::HiRes::gettimeofday() ];
+
 	# Hand off to each of the tasks
 	my %tasks   = $self->tasks or return undef;
 	my %results = map { $_ => undef } keys %tasks;
@@ -79,6 +87,11 @@ sub process_file {
 		$results{$task} = $tasks{$task}->( $file, $path );
 		last unless defined $results{$task};
 	}
+
+	# Save the processing time
+	$results{'00total_time'} = sprintf( '%.2d',
+		Time::HiRes::tv_interval( $start ),
+		);
 
 	# Save the results
 	$self->store_file( $path, \%results );	

@@ -1,5 +1,13 @@
 Revision history for Perl extension PPI::Tinderbox
 
+0.08 Tue Jan 11 2005
+	- before_file and after_file tracing subs no longer needed
+	- Passing trace option through to Processor and enable trace_summary as well
+
+0.07 Tue Jan 11 2005
+	- Adding 00total_time generated outside the main task loop
+	- Skip any files bigger than 500k... PPI is really bad at huge files
+
 0.06 Mon Jan 10 2005
 	- Write the output file with relative paths, not absolute paths
 	- Updated to handle some minor changes in PPI::Processor 0.13

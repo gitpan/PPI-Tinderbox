@@ -83,7 +83,7 @@ use PPI::Tinderbox::Task ();
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '0.07';
+	$VERSION = '0.08';
 }
 
 
@@ -114,6 +114,8 @@ sub new {
 		source        => delete($args{source}),
 		flush_results => delete($args{flush_results}),
 		limit         => delete($args{limit_processor}),
+		trace         => $args{trace},
+		trace_summary => $args{trace},
 		);
 	unless ( $Processor ) {
 		return $class->_error( PPI::Processor->errstr );
@@ -150,10 +152,6 @@ sub new {
 	# Create the CPAN Processor
 	my $self = $class->SUPER::new( %args );
 	return $self unless $self;
-
-	# Manually add the callbacks
-	$Processor->{before_file} = sub { $self->trace( "Processing $_[0]" ); 1 };
-	$Processor->{after_file}  = sub { $self->trace( " ... done\n" ) };
 
 	$self;
 }

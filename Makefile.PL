@@ -7,8 +7,9 @@ version_from  ( 'lib/PPI/Tinderbox.pm'       );
 license       ( 'perl'                       );
 
 requires      ( 'perl'            => '5.005' );
+requires      ( 'Time::HiRes'     => '1.64'  );
 requires      ( 'PPI'             => '0.840' );
-requires      ( 'PPI::Processor'  => '0.13'  );
+requires      ( 'PPI::Processor'  => '0.14'  );
 requires      ( 'CPAN::Processor' => '0.07'  );
 
 build_requires( 'File::Spec'      => '0.82'  );
