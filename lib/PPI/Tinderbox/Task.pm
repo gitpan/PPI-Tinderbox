@@ -23,10 +23,11 @@ use UNIVERSAL 'isa';
 use base 'PPI::Processor::KeyedTask::Ini';
 use PPI::Tokenizer ();
 use PPI::Lexer     ();
+use threads        ();
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '0.05';
+	$VERSION = '0.06';
 }
 
 # Unlike the general KeyedTask, this CAN autoconstruct
@@ -68,21 +69,19 @@ sub new {
 }
 
 sub process_file {
-	my ($self, $filename) = @_;
+	my ($self, $file, $path) = @_;
 
 	# Hand off to each of the tasks
 	my %tasks   = $self->tasks or return undef;
 	my %results = map { $_ => undef } keys %tasks;
 	foreach my $task ( sort keys %tasks ) {
-		eval {
-			local $_ = $filename;
-			$results{$task} = $tasks{$task}->($filename);
-		};
-		last if $@; # Skip the rest of the tests on error
+		local $_ = $file;
+		$results{$task} = $tasks{$task}->( $file, $path );
+		last unless defined $results{$task};
 	}
 
 	# Save the results
-	$self->store_file( $filename, \%results );	
+	$self->store_file( $path, \%results );	
 }
 
 # Can we load the Tokenizer for the file without error
@@ -90,8 +89,7 @@ sub task_tokenizer {
 	my ($class, $file) = @_;
 
 	# Create the one-shot Tokenizer
-	my $Tokenizer = PPI::Tokenizer->load( $file )
-		or die "Failed to create new Tokenizer";
+	my $Tokenizer = PPI::Tokenizer->load( $file ) or return undef;
 
 	1;	
 }
@@ -101,13 +99,14 @@ sub task_tokens {
 	my ($class, $file) = @_;
 
 	# Create the one-shot Tokenizer
-	my $Tokenizer = PPI::Tokenizer->load( $file )
-		or die "Failed to create new Tokenizer";
+	my $Tokenizer = PPI::Tokenizer->load( $file ) or return undef;
 
 	# Pull the tokens and handle errors
-	my $Tokens = $Tokenizer->all_tokens;
-	die "Error getting all tokens" unless defined $Tokens;
-	die "Found no tokens in the file" unless $Tokens;
+	my $Tokens;
+	eval {
+		$Tokens = $Tokenizer->all_tokens;
+	};
+	return undef unless $Tokens;
 
 	# Return the number of Tokens found as the result
 	scalar @$Tokens;
@@ -122,8 +121,8 @@ sub task_lexer_leak {
 	my $start = scalar keys %PPI::_ELEMENT;
 
 	# Parse the Document and DESTROY it if it is created
-	my $Document = PPI::Document->load( $file );
-	$Document->DESTROY if $Document;
+	my $Document = PPI::Document->load( $file ) or return undef;
+	$Document->DESTROY;
 
 	# How many refs did we leak?
 	my $leak = scalar keys %PPI::_ELEMENT;
@@ -137,8 +136,8 @@ sub task_document {
 	my ($class, $file) = @_;
 
 	# Create the document
-	my $Document = PPI::Document->load( $file )
-		or die "Failed to parse document into a PPI::Document object";
+	my $Document = PPI::Document->load( $file ) or return undef;
+	$Document->DESTROY;
 
 	1;
 }
@@ -148,12 +147,13 @@ sub task_unmatched {
 	my ($class, $file) = @_;
 
 	# Load the Document
-	my $Document = PPI::Document->load( $file )
-		or die "Failed to create PPI::Document";
-
+	my $Document = PPI::Document->load( $file ) or return undef;
+	
 	# Can we find any unmatched brace statements
 	### NOTE: Yes, we do want this to be zero, not ''
-	$Document->find_any( 'Statement::UnmatchedBrace' ) ? 1 : 0;
+	my $rv = $Document->find_any( 'Statement::UnmatchedBrace' ) ? 1 : 0;
+	$Document->DESTROY if $Document;
+	$rv;
 }
 
 1;

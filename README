@@ -64,7 +64,7 @@ EXTENDING
     You may wish to take a look at the more general CPAN::Processor instead.
 
 METHODS
-new minicpan => $CPAN::Mini,
+new
     The "new" constructor creates a new PPI Tinderbox top level object,
     which stores the configuration and acts primarily as a management class,
     setting up and launching the Processor.

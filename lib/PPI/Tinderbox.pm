@@ -83,7 +83,7 @@ use PPI::Tinderbox::Task ();
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '0.05';
+	$VERSION = '0.07';
 }
 
 
@@ -95,7 +95,7 @@ BEGIN {
 
 =pod
 
-=head1 new minicpan => $CPAN::Mini, 
+=head1 new
 
 The C<new> constructor creates a new PPI Tinderbox top level object,
 which stores the configuration and acts primarily as a management
@@ -111,9 +111,9 @@ sub new {
 
 	# Create the Processor
 	my $Processor = PPI::Processor->new(
-		source     => delete($args{source}),
-		flushstore => delete($args{flush_results}),
-		limit      => delete($args{limit_processor}),
+		source        => delete($args{source}),
+		flush_results => delete($args{flush_results}),
+		limit         => delete($args{limit_processor}),
 		);
 	unless ( $Processor ) {
 		return $class->_error( PPI::Processor->errstr );

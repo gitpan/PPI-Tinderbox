@@ -1,6 +1,10 @@
 Revision history for Perl extension PPI::Tinderbox
 
-0.05 Mon Jan 10 2004
+0.06 Mon Jan 10 2005
+	- Write the output file with relative paths, not absolute paths
+	- Updated to handle some minor changes in PPI::Processor 0.13
+
+0.05 Mon Jan 10 2005
 	- Enable the 'incremental_write' option by default
 	- Updated dependencies to ensure incremental_write is available
 
